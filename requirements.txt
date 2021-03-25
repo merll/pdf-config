@@ -1,5 +1,6 @@
+-i https://pypi.org/simple/
 fire==0.2.1
-PyPDF4==1.27.0
-PyYAML==5.3
-six==1.14.0
+pypdf4==1.27.0
+pyyaml==5.4
+six==1.15.0
 termcolor==1.1.0
