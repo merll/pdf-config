@@ -64,12 +64,20 @@ class PdfFileComposer:
         max_pdf_version = ''
         for item in contents:
             bookmark_title = item.get('bookmark')
-            if bookmark_title:
+            bookmarks_keep = item.get('keepbookmarks')
+
+            if bookmarks_keep:
+                import_bookmarks = True
+            else:
+                import_bookmarks = False
+
+            if bookmark_title and not import_bookmarks:
                 log.info("Inserting bookmark '%s' on page %d", bookmark_title, level_base_page + level_pages)
                 this_bookmark = merger.addBookmark(bookmark_title, level_base_page + level_pages,
                                                    parent=parent_bookmark)
             else:
-                this_bookmark = parent_bookmark
+                if bookmark_title:
+                    this_bookmark = parent_bookmark
             document_filename = item.get('document')
             if document_filename:
                 resolved_name = self._resolve_file(document_filename)
@@ -78,7 +86,11 @@ class PdfFileComposer:
                     pdf_info = get_pdf_info(input_pdf)
                     max_pdf_version = max(max_pdf_version, pdf_info.pdf_version)
                     level_pages += pdf_info.num_pages
-                    merger.append(input_pdf)
+                    if import_bookmarks:
+                        merger.append(input_pdf, import_bookmarks=import_bookmarks,
+                                      bookmark=bookmark_title)
+                    else:
+                        merger.append(input_pdf, import_bookmarks=import_bookmarks)
                     log.info("%d pages appended", pdf_info.num_pages)
             nested_contents = item.get('contents')
             if nested_contents:
